@@ -2,7 +2,7 @@
 a few custom LXC management scripts
 
 ## Installation:
-1. Determine the location of your existing LXC tools (ex: /usr/bin)  
+1. Determine the location of your existing LXC tools (ex: ```/usr/bin```)  
 2. Run ```sudo cp lxc* /usr/bin```  
 
 ## Usage:  

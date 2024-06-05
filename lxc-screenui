@@ -15,8 +15,6 @@ if [ -n "$ISROOT" ]; then
 		export TABLE="$TABLE -r 10"
 	fi
 
-	echo $TABLE
-	read -s -n1 cont
 	screen bash -c "$TABLE $(lxc-ls -1 | while read container; do echo -n "&& screen -t $container $IDX lxc-attach -n $container "; export IDX="$[ $IDX + 1 ]"; done)"
 	
 	lxc-stopall

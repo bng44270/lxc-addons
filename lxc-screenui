@@ -1,0 +1,25 @@
+#!/bin/bash
+
+ISROOT="$(whoami | grep '^root$')"
+
+if [ -n "$ISROOT" ]; then
+	lxc-startall
+
+	IDX="1"
+
+	TABLE="screen -t Summary 0 lxc-infotab"
+
+	if [ "$1" == "-r" ] && [ -n "$2" ]; then
+		export TABLE="$TABLE -r $2"
+	else
+		export TABLE="$TABLE -r 10"
+	fi
+
+	echo $TABLE
+	read -s -n1 cont
+	screen bash -c "$TABLE $(lxc-ls -1 | while read container; do echo -n "&& screen -t $container $IDX lxc-attach -n $container "; export IDX="$[ $IDX + 1 ]"; done)"
+	
+	lxc-stopall
+else
+	echo "Requires root access"
+fi

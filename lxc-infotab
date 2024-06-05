@@ -1,0 +1,52 @@
+#!/bin/bash
+
+ISROOT="$(whoami | grep '^root$')"
+
+if [ -n "$ISROOT" ]; then
+	if [ -z "$1" ]; then
+		awk '{ printf("%-15s%-10s%-8s%-18s%-13s%-12s%-12s\n",$1,$2,$3,$4,$5,$6,$7); }' <<< "Name State PID IP IFace TXbytes RXbytes"
+		lxc-ls -1 | while read container; do
+			$0 $container COLLECT
+		done
+	elif [ "$1" == "-r" ]; then
+		if [ -n "$2" ]; then
+			while true; do
+				clear
+				$0
+				echo ""
+				for sec in $(seq $2 -1 1); do
+					printf "\r                   \rRefreshing $sec"
+					sleep 1
+				done
+			done
+		else
+			$0
+		fi
+	else
+		if [ "$2" != "COLLECT" ]; then
+			awk '{ printf("%-15s%-10s%-8s%-18s%-13s%-12s%-12s\n",$1,$2,$3,$4,$5,$6,$7); }' <<< "Name State PID IP IFace TXbytes"
+		fi
+		
+		lxc-info -n $1 -H | awk 'BEGIN {
+				name = "";
+				state = "";
+				pid = "";
+				ipaddr = "";
+				hif = "";
+				txb = 0;
+				rxb = 0;
+			}
+			/^Name:/ { name = $2 }
+			/^State:/ { state = $2 }
+			/^PID:/ { pid = $2 }
+			/^IP:/ { ipaddr = $2 }
+			/^Link:/ { hif = $2 }
+			/^[ \t]+TX bytes:/ { txb = int($3) }
+			/^[ \t]+RX bytes:/ { rxb = int($3) }
+			END {
+				printf("%-15s%-10s%-8s%-18s%-13s%-12s%-12s\n",name,state,pid,ipaddr,hif,txb,rxb);
+			}'
+       	fi
+else
+        echo "Requires root access"
+fi

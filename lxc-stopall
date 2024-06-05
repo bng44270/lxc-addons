@@ -1,0 +1,16 @@
+#!/bin/bash
+
+ISROOT="$(whoami | grep '^root$')"
+
+if [ -n "$ISROOT" ]; then
+	lxc-ls -1 | while read container; do
+		lxc-info -n $container | grep 'State:[ \t]\+RUNNING' > /dev/null
+		if [ $? -eq 0 ]; then
+			echo -n "Stopping $container..."
+			lxc-stop -n $container
+			echo "done"
+		fi
+	done
+else
+	echo "Requires root access"
+fi

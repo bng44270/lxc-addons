@@ -3,7 +3,10 @@
 ISROOT="$(whoami | grep '^root$')"
 
 if [ -n "$ISROOT" ]; then
-	lxc-startall
+	read -n1 -s -p "Start all containers? [N/y]" startall
+	echo ""
+
+	[[ $startall =~ [Yy] ]] && lxc-startall
 
 	IDX="1"
 
@@ -17,7 +20,11 @@ if [ -n "$ISROOT" ]; then
 
 	screen bash -c "$TABLE $(lxc-ls -1 | while read container; do echo -n "&& screen -t $container $IDX lxc-attach -n $container "; export IDX="$[ $IDX + 1 ]"; done)"
 	
-	lxc-stopall
+	read -n1 -s -p "Stop all containers? [N/y] " stopall
+	
+	echo ""
+
+	[[ $stopall =~ [Yy] ]] && lxc-stopall
 else
 	echo "Requires root access"
 fi

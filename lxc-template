@@ -1,0 +1,28 @@
+#!/bin/bash
+
+##########################
+#
+# lxc-template
+#
+# Create Debian-based LXC template with specific
+# packages installed by default
+#
+# Example:
+#
+#    Create a template that will include Python, PIP, and Flask
+#
+#    sudo lxc-template python3 python3-pip python3-flask > /usr/share/lxc/tempaltes/lxc-debian-python3
+#
+# Tested on Debian 12
+#
+##########################
+
+
+if [ -z "$1" ]; then
+        echo "usage:  lxc-template <package> [<package> ...]"
+else
+        PACKAGES_LIST="$(sed 's/[ \t]\+/,/g' <<< "$@")"
+
+        head -n $[ $(grep -n '^post_process[^(]' /usr/share/lxc/templates/lxc-debian | cut -d':' -f1) - 1 ] /usr/share/lxc/templates/lxc-debian
+        tail -n $[ $(wc -l /usr/share/lxc/templates/lxc-debian | cut -d' ' -f1) - $(grep -n '^post_process[^(]' /usr/share/lxc/templates/lxc-debian | cut -d':' -f1) + 1 ] /usr/share/lxc/templates/lxc-debian | sed 's/\(\${packages}\)/\1,'"$PACKAGES_LIST"'/g'
+fi
